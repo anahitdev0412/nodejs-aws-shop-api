@@ -10,13 +10,17 @@
     "lint": "eslint src data utils types --ext .ts",
     "clean": "rm -rf dist"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "@types/aws-lambda": "^8.10.145"
+    "@types/aws-lambda": "^8.10.145",
+    "swagger-ui-dist": "^5.32.5"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
-    "@types/node": "^22.10.0"
+    "@types/node": "^22.10.0",
+    "@types/swagger-ui-dist": "^3.30.6",
+    "typescript": "^5.7.2"
   },
   "license": "ISC"
 }

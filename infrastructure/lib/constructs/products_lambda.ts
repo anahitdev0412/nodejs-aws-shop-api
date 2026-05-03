@@ -68,7 +68,7 @@ export class ProductsLambda extends Construct {
         : lambda.Tracing.DISABLED,
       bundling: {
         externalModules: [],
-        minify: true,
+        minify: false,
         sourceMap: true,
         target: "node22",
         esbuildArgs: {

@@ -10,6 +10,7 @@ export interface ProductsApiGatewayProps {
   envName: string;
   getProductsListFn: lambda.Function;
   getProductByIdFn: lambda.Function;
+  getSwaggerFn: lambda.Function; // Optional, only needed if Swagger UI is enabled;
 }
 
 /**
@@ -49,8 +50,8 @@ export class ProductsApiGateway extends Construct {
           "X-Api-Key",
         ],
         maxAge: cdk.Duration.days(1),
-      },
-      createDefaultStage: false,
+      }
+      // createDefaultStage: false,
     });
 
     // Stage
@@ -95,6 +96,25 @@ export class ProductsApiGateway extends Construct {
       integration: getProductByIdIntegration,
     });
 
+    // GET /swagger and GET /swagger/swagger.json → getSwagger
+    this.api.addRoutes({
+      path: "/swagger",
+      methods: [apigwv2.HttpMethod.GET],
+      integration: new apigwv2Integrations.HttpLambdaIntegration(
+        "GetSwaggerIntegration",
+        props.getSwaggerFn
+      ),
+    });
+
+    this.api.addRoutes({
+      path: "/swagger/swagger.json",
+      methods: [apigwv2.HttpMethod.GET],
+      integration: new apigwv2Integrations.HttpLambdaIntegration(
+        "GetSwaggerJsonIntegration",
+        props.getSwaggerFn
+      ),
+    });
+
     // Outputs
     const apiUrl = `${this.api.apiEndpoint}/${props.envName}/`;
 
@@ -117,6 +137,11 @@ export class ProductsApiGateway extends Construct {
     new cdk.CfnOutput(this, "ProductByIdEndpoint", {
       value: `${apiUrl}products/{productId}`,
       description: "GET /products/{productId} endpoint",
+    });
+
+    new cdk.CfnOutput(this, "SwaggerUiEndpoint", {
+      value: `${apiUrl}swagger`,
+      description: "Swagger UI endpoint",
     });
   }
 }

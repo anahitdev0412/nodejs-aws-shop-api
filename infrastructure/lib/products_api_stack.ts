@@ -52,11 +52,26 @@ export class ProductsApiStack extends cdk.Stack {
       ),
     });
 
+    const getSwagger = new ProductsLambda(this, "GetSwagger", {
+      ...sharedLambdaProps,
+      functionName: "getSwagger",
+      entry: path.join(
+        MONOREPO_ROOT,
+        "product_service/lambdas/get_swagger/src/index.ts",
+      ),
+      description: "Serves Swagger UI",
+      lambdaPackagePath: path.join(
+        MONOREPO_ROOT,
+        "product_service/lambdas/get_swagger"
+      ),
+    });
+
     // API Gateway
     new ProductsApiGateway(this, "ApiGateway", {
       envName,
       getProductsListFn: getProductsList.lambdaFunction,
       getProductByIdFn: getProductById.lambdaFunction,
+      getSwaggerFn: getSwagger.lambdaFunction,
     });
   }
 }
