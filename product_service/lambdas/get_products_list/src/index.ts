@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, Context } from "aws-lambda";
 import { PRODUCTS, Logger, successResponse, internalErrorResponse } from "@products-api/shared";
 
 const logger = new Logger("get-products-list");
@@ -8,14 +8,14 @@ const logger = new Logger("get-products-list");
  * Returns a list of all available products.
  */
 export const handler = async (
-  event: APIGatewayProxyEvent,
+  event: APIGatewayProxyEventV2,
   context: Context
-): Promise<APIGatewayProxyResult> => {
+): Promise<APIGatewayProxyResultV2> => {
   const log = logger.withRequestId(context.awsRequestId);
 
   log.info("Received request", {
-    path: event.path,
-    method: event.httpMethod,
+    path: event.rawPath,
+    method: event.requestContext.http.method,
     queryStringParameters: event.queryStringParameters,
   });
 

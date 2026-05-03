@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda"; 
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, Context } from "aws-lambda";
 import { Logger, successResponse, internalErrorResponse, notFoundResponse, validationErrorResponse,  ErrorCodes, findProductById  } from "@products-api/shared";  
 
 const logger = new Logger("get-product-by-id");
@@ -7,15 +7,13 @@ const logger = new Logger("get-product-by-id");
  * GET /products/{productId}
  * Returns a single product matching the given ID.
  */
-export const handler = async (
-  event: APIGatewayProxyEvent,
-  context: Context
-): Promise<APIGatewayProxyResult> => {
+
+export const handler = async (event: APIGatewayProxyEventV2, context: Context): Promise<APIGatewayProxyResultV2> => {
   const log = logger.withRequestId(context.awsRequestId);
 
   log.info("Received request", {
-    path: event.path,
-    method: event.httpMethod,
+    path: event.rawPath,
+    method: event.requestContext.http.method,
     pathParameters: event.pathParameters,
   });
 

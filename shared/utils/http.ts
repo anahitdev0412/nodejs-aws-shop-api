@@ -1,4 +1,4 @@
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResultV2 } from "aws-lambda";
 import { ApiResponse, ApiError, ResponseMeta } from "../types/api";
 
 const CORS_HEADERS = {
@@ -12,7 +12,7 @@ const CORS_HEADERS = {
 export function buildResponse<T>(
   statusCode: number,
   body: ApiResponse<T>
-): APIGatewayProxyResult {
+): APIGatewayProxyResultV2 {
   return {
     statusCode,
     headers: CORS_HEADERS,
@@ -24,7 +24,7 @@ export function successResponse<T>(
   data: T,
   meta?: Partial<ResponseMeta>,
   statusCode = 200
-): APIGatewayProxyResult {
+): APIGatewayProxyResultV2 {
   const response: ApiResponse<T> = {
     success: true,
     data,
@@ -39,7 +39,7 @@ export function successResponse<T>(
 export function errorResponse(
   statusCode: number,
   error: ApiError
-): APIGatewayProxyResult {
+): APIGatewayProxyResultV2 {
   const response: ApiResponse<never> = {
     success: false,
     error,
@@ -50,11 +50,11 @@ export function errorResponse(
   return buildResponse(statusCode, response);
 }
 
-export function notFoundResponse(message: string, code: string): APIGatewayProxyResult {
+export function notFoundResponse(message: string, code: string): APIGatewayProxyResultV2 {
   return errorResponse(404, { code, message });
 }
 
-export function internalErrorResponse(requestId?: string): APIGatewayProxyResult {
+export function internalErrorResponse(requestId?: string): APIGatewayProxyResultV2 {
   return errorResponse(500, {
     code: "INTERNAL_SERVER_ERROR",
     message: "An internal server error occurred",
@@ -62,7 +62,7 @@ export function internalErrorResponse(requestId?: string): APIGatewayProxyResult
   });
 }
 
-export function validationErrorResponse(message: string, details?: Record<string, unknown>): APIGatewayProxyResult {
+export function validationErrorResponse(message: string, details?: Record<string, unknown>): APIGatewayProxyResultV2 {
   return errorResponse(400, {
     code: "VALIDATION_ERROR",
     message,
