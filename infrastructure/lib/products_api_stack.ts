@@ -44,7 +44,7 @@ export class ProductsApiStack extends cdk.Stack {
     const getProductById = new ProductsLambda(this, "GetProductById", {
       ...sharedLambdaProps,
       functionName: "getProductById",
-      entry: path.join(MONOREPO_ROOT, "product_service/lambdas/get_products_list/src/index.ts"),
+      entry: path.join(MONOREPO_ROOT, "product_service/lambdas/get_products_by_id/src/index.ts"),
       description: "Returns a single product by ID (GET /products/{productId})",
       lambdaPackagePath: path.join(
         MONOREPO_ROOT,
