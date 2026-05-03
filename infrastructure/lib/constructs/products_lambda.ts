@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs"
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -8,7 +9,7 @@ import * as path from "path";
 export interface ProductsLambdaProps {
   functionName: string;
   lambdaPackagePath: string;
-  handler: string;
+  entry: string;
   description: string;
   enableTracing: boolean;
   /** Environment variables */
@@ -16,6 +17,8 @@ export interface ProductsLambdaProps {
   /** Environment name (dev/staging/prod) */
   envName: string;
 }
+
+const MONOREPO_ROOT = path.join(__dirname, "../../../");
 
 export class ProductsLambda extends Construct {
   public readonly lambdaFunction: lambda.Function;
@@ -51,19 +54,27 @@ export class ProductsLambda extends Construct {
     });
 
     // Lambda Function
-    this.lambdaFunction = new lambda.Function(this, "Function", {
+    this.lambdaFunction = new NodejsFunction(this, "Function", {
       functionName: `${props.functionName}-${props.envName}`,
       description: props.description,
       runtime: lambda.Runtime.NODEJS_22_X,
-      handler: props.handler,
-      code: lambda.Code.fromAsset(
-        path.join(props.lambdaPackagePath, "dist")
-      ),
+      entry: props.entry,
+      projectRoot: MONOREPO_ROOT,
+      depsLockFilePath: path.join(MONOREPO_ROOT, "package-lock.json"),
       role,
       logGroup: this.logGroup,
       tracing: props.enableTracing
         ? lambda.Tracing.ACTIVE
         : lambda.Tracing.DISABLED,
+      bundling: {
+        externalModules: [],
+        minify: true,
+        sourceMap: true,
+        target: "node22",
+        esbuildArgs: {
+          "--tree-shaking": "true",
+        },
+      },
       environment: {
         NODE_ENV: props.envName,
         POWERTOOLS_SERVICE_NAME: props.functionName,

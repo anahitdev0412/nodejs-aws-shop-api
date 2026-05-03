@@ -32,7 +32,7 @@ export class ProductsApiStack extends cdk.Stack {
     const getProductsList = new ProductsLambda(this, "GetProductsList", {
       ...sharedLambdaProps,
       functionName: "getProductsList",
-      handler: "index.handler",
+      entry: path.join(MONOREPO_ROOT, "product_service/lambdas/get_products_list/src/index.ts"),
       description: "Returns a list of all products (GET /products)",
       lambdaPackagePath: path.join(
         MONOREPO_ROOT,
@@ -44,7 +44,7 @@ export class ProductsApiStack extends cdk.Stack {
     const getProductById = new ProductsLambda(this, "GetProductById", {
       ...sharedLambdaProps,
       functionName: "getProductById",
-      handler: "index.handler",
+      entry: path.join(MONOREPO_ROOT, "product_service/lambdas/get_products_list/src/index.ts"),
       description: "Returns a single product by ID (GET /products/{productId})",
       lambdaPackagePath: path.join(
         MONOREPO_ROOT,
