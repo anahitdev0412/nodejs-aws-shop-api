@@ -1,0 +1,22 @@
+{
+  "name": "@nodejs-aws-shop-api/shared",
+  "version": "1.0.0",
+  "description": "Shared types, models, and utilities for Products API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "build:watch": "tsc --project tsconfig.json --watch",
+    "lint": "eslint src data utils types --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.145"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.0"
+  },
+  "license": "ISC"
+}

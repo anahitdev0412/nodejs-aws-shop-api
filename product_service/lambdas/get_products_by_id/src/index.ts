@@ -8,9 +8,6 @@ import { ErrorCodes } from "../../../../shared/types/error_codes";
 
 const logger = new Logger("get-product-by-id");
 
-// Product ID pattern: alphanumeric with dashes
-const PRODUCT_ID_PATTERN = /^[a-zA-Z0-9-_]{1,64}$/;
-
 /**
  * GET /products/{productId}
  * Returns a single product matching the given ID.
@@ -30,21 +27,13 @@ export const handler = async (
   try {
     const productId = event.pathParameters?.productId;
 
-    // ── Validation ───────────────────────────────────────────────────────────
+    // Validation
     if (!productId) {
-      log.warn("Missing productId path parameter");
-      return validationErrorResponse("productId path parameter is required");
+      log.warn("Missing productId path/query parameter");
+      return validationErrorResponse("productId path/query parameter is required");
     }
 
-    if (!PRODUCT_ID_PATTERN.test(productId)) {
-      log.warn("Invalid productId format", { productId });
-      return validationErrorResponse(
-        "Invalid productId format. Must be alphanumeric with dashes (1-64 chars)",
-        { productId }
-      );
-    }
-
-    // ── Lookup ────────────────────────────────────────────────────────────────
+    // Lookup product by ID
     log.info("Looking up product", { productId });
     const product = findProductById(productId);
 

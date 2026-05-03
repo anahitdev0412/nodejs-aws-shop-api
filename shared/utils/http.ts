@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { ApiResponse, ApiError, ResponseMeta } from "./types/api";
+import { ApiResponse, ApiError, ResponseMeta } from "../types/api";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
