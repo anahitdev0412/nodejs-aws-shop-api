@@ -27,6 +27,7 @@ export function successResponse<T>(
 ): APIGatewayProxyResultV2 {
   const response: ApiResponse<T> = {
     success: true,
+    statusCode: statusCode,
     data,
     meta: {
       timestamp: new Date().toISOString(),
@@ -42,6 +43,7 @@ export function errorResponse(
 ): APIGatewayProxyResultV2 {
   const response: ApiResponse<never> = {
     success: false,
+    statusCode: statusCode,
     error,
     meta: {
       timestamp: new Date().toISOString(),

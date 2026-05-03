@@ -5,11 +5,12 @@
   "workspaces": [
     "shared",
     "product_service/lambdas/*",
-    "infrastructure"
+    "infrastructure",
+    "test"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test --workspaces=test --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "deploy": "npm run deploy --workspace=infrastructure",
     "deploy:dev": "npm run deploy:dev --workspace=infrastructure",
@@ -25,8 +26,12 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.161",
+    "@types/jest": "^30",
     "@types/node": "^22.10.0",
     "esbuild": "^0.28.0",
+    "jest": "^30",
+    "ts-jest": "^29",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   },
   "keywords": [],
