@@ -1,10 +1,32 @@
 {
   "name": "nodejs-aws-shop-api",
   "version": "1.0.0",
-  "description": "RS School training App Backend",
-  "main": "index.js",
+  "description": "RS School training App Backend - AWS CDK Monorepo with Lambda + API Gateway",
+  "workspaces": [
+    "shared",
+    "product_service/lambdas/*",
+    "infrastructure"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "deploy": "npm run deploy --workspace=infrastructure",
+    "deploy:dev": "npm run deploy:dev --workspace=infrastructure",
+    "deploy:prod": "npm run deploy:prod --workspace=infrastructure",
+    "destroy": "npm run destroy --workspace=infrastructure",
+    "synth": "npm run synth --workspace=infrastructure",
+    "diff": "npm run diff --workspace=nfrastructure",
+    "clean": "find . -name 'dist' -type d -not -path '*/node_modules/*' | xargs rm -rf && find . -name '*.js' -not -path '*/node_modules/*' -not -name '*.config.js' | xargs rm -f"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/aws-lambda": "^8.10.161",
+    "typescript": "^5.7.2"
   },
   "keywords": [],
   "author": "",
@@ -13,8 +35,5 @@
     "aws-cdk-lib": "^2.252.0",
     "aws-lambda": "^1.0.7",
     "constructs": "^10.6.0"
-  },
-  "devDependencies": {
-    "@types/aws-lambda": "^8.10.161"
   }
 }

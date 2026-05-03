@@ -1,7 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-import { PRODUCTS } from "../../../../shared/data/products";
-import { Logger } from "../../../../shared/utils/logger";
-import { successResponse, internalErrorResponse } from "../../../../shared/utils/http";
+import { PRODUCTS, Logger, successResponse, internalErrorResponse } from "@products-api/shared";
 
 const logger = new Logger("get-products-list");
 

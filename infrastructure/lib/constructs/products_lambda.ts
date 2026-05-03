@@ -69,12 +69,7 @@ export class ProductsLambda extends Construct {
         POWERTOOLS_SERVICE_NAME: props.functionName,
         LOG_LEVEL: props.envName === "prod" ? "INFO" : "DEBUG",
         ...props.environment,
-      },
-      // Prevent accidental deletion of functions in production
-      logRemovalPolicy:
-        props.envName === "prod"
-          ? cdk.RemovalPolicy.RETAIN
-          : cdk.RemovalPolicy.DESTROY,
+      }
     });
 
     // Output Lambda ARN

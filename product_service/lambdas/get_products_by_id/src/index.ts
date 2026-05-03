@@ -1,10 +1,5 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-import { findProductById } from "../../../../shared/data/products";
-import { Logger } from "../../../../shared/utils/logger";
-import { successResponse, internalErrorResponse } from "../../../../shared/utils/http";
-import { notFoundResponse } from "../../../../shared/utils/http";
-import { validationErrorResponse } from "../../../../shared/utils/http";
-import { ErrorCodes } from "../../../../shared/types/error_codes";    
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda"; 
+import { Logger, successResponse, internalErrorResponse, notFoundResponse, validationErrorResponse,  ErrorCodes, findProductById  } from "@products-api/shared";  
 
 const logger = new Logger("get-product-by-id");
 
