@@ -95,28 +95,28 @@ export class ProductsApiGateway extends Construct {
       integration: getProductByIdIntegration,
     });
 
-    // // Outputs
-    // const apiUrl = `${this.api.url}`;
+    // Outputs
+    const apiUrl = `${this.api.apiEndpoint}/${props.envName}/`;
 
-    // new cdk.CfnOutput(this, "ApiUrl", {
-    //   value: apiUrl,
-    //   description: "Products API base URL",
-    //   exportName: `products-api-url-${props.envName}`,
-    // });
+    new cdk.CfnOutput(this, "ApiUrl", {
+      value: apiUrl,
+      description: "Products API base URL",
+      exportName: `products-api-url-${props.envName}`,
+    });
 
-    // new cdk.CfnOutput(this, "ApiId", {
-    //   value: this.api.apiId,
-    //   description: "Products HTTP API Gateway ID",
-    // });
+    new cdk.CfnOutput(this, "ApiId", {
+      value: this.api.apiId,
+      description: "Products HTTP API Gateway ID",
+    });
 
-    // new cdk.CfnOutput(this, "ProductsListEndpoint", {
-    //   value: `${apiUrl}products`,
-    //   description: "GET /products endpoint",
-    // });
+    new cdk.CfnOutput(this, "ProductsListEndpoint", {
+      value: `${apiUrl}products`,
+      description: "GET /products endpoint",
+    });
 
-    // new cdk.CfnOutput(this, "ProductByIdEndpoint", {
-    //   value: `${apiUrl}products/{productId}`,
-    //   description: "GET /products/{productId} endpoint",
-    // });
+    new cdk.CfnOutput(this, "ProductByIdEndpoint", {
+      value: `${apiUrl}products/{productId}`,
+      description: "GET /products/{productId} endpoint",
+    });
   }
 }
