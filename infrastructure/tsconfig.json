@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "lib": ["ES2022"],
+    "target": "ES2022",
+    "module": "commonjs"
+  },
+  "include": ["bin/**/*", "lib/**/*"],
+  "exclude": ["node_modules", "dist", "cdk.out"]
+}

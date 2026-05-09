@@ -1,0 +1,26 @@
+{
+  "name": "@products-api/shared",
+  "version": "1.0.0",
+  "description": "Shared types, models, and utilities for Products API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "build:watch": "tsc --project tsconfig.json --watch",
+    "lint": "eslint src data utils types --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "swagger-ui-dist": "^5.32.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/swagger-ui-dist": "^3.30.6",
+    "typescript": "^5.7.2"
+  },
+  "license": "ISC"
+}

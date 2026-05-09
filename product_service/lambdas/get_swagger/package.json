@@ -1,0 +1,17 @@
+{
+  "name": "@products-api/get-swagger",
+  "version": "1.0.0",
+  "description": "Lambda: GET /swagger - Serves Swagger UI",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "@products-api/shared": "*"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}
