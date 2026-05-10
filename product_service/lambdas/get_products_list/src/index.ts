@@ -1,5 +1,6 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, Context } from "aws-lambda";
-import { PRODUCTS, Logger, successResponse, internalErrorResponse } from "@products-api/shared";
+import { Logger, successResponse, internalErrorResponse, Product, Stock, ProductWithStock, docClient  } from "@products-api/shared";
+import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 const logger = new Logger("get-products-list");
 
@@ -20,11 +21,25 @@ export const handler = async (
   });
 
   try {
-    let products = PRODUCTS;
-    log.info("Returning products list", { count: products.length });
+    const [productsResult, stocksResult] = await Promise.all([
+      docClient.send(new ScanCommand({ TableName: process.env.PRODUCTS_TABLE_NAME })),
+      docClient.send(new ScanCommand({ TableName: process.env.STOCKS_TABLE_NAME })),
+    ]);
 
-    return successResponse(products, {
-      total: products.length,
+    const products = (productsResult.Items ?? []) as Product[];
+    const stocks   = (stocksResult.Items   ?? []) as Stock[];
+
+    // Join products with stock count
+    const productsWithStock: ProductWithStock[] = products.map((product) => {
+      const stock = stocks.find((s) => s.product_id === product.id);
+      return {
+        ...product,
+        count: stock?.count ?? 0,
+      };
+    });
+
+    return successResponse(productsWithStock, {
+      total: productsWithStock.length,
       requestId: context.awsRequestId,
     });
   } catch (error) {
