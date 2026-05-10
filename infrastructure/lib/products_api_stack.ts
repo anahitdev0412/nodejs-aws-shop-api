@@ -75,12 +75,30 @@ export class ProductsApiStack extends cdk.Stack {
       },
     });
 
+        // Lambda: getProductById 
+    const createProduct = new LambdaConstruct(this, "CreateProduct", {
+      ...sharedLambdaProps,
+      functionName: "createProduct",
+      entry: path.join(MONOREPO_ROOT, "product_service/lambdas/create_product/src/index.ts"),
+      description: "Creates a new product (POST /products)",
+      lambdaPackagePath: path.join(
+        MONOREPO_ROOT,
+        "product_service/lambdas/create_product"
+      ),
+      environment: {
+        PRODUCTS_TABLE_NAME: productsTable.tableName,
+        STOCKS_TABLE_NAME: stocksTable.tableName,
+      },
+    });
+
     //
     productsTable.grantReadData(getProductsList.lambdaFunction);
     productsTable.grantReadData(getProductById.lambdaFunction);
     stocksTable.grantReadData(getProductsList.lambdaFunction);
     stocksTable.grantReadData(getProductById.lambdaFunction);
-
+    productsTable.grantWriteData(createProduct.lambdaFunction);
+    stocksTable.grantWriteData(createProduct.lambdaFunction);
+    
     const gateway = new ApiGatewayConstruct(this, "ProductsApiGateway", {
       envName,
       routes: [
@@ -96,6 +114,12 @@ export class ProductsApiStack extends cdk.Stack {
           method: apigwv2.HttpMethod.GET,
           fn: getProductById.lambdaFunction,
           integrationId: "GetProductByIdIntegration",
+        },
+        {
+          path: "/products",
+          method: apigwv2.HttpMethod.POST,
+          fn: createProduct.lambdaFunction,
+          integrationId: "CreateProductIntegration",
         },
       ],
     });
