@@ -5,6 +5,7 @@ import { LambdaConstruct } from "./constructs/lambda_construct";
 import { ApiGatewayConstruct } from "./constructs/api_gateway_construct";
 import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { SwaggerConstruct } from "./constructs/swagger_construct";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export interface ProductsApiStackProps extends cdk.StackProps {
   envName: string;
@@ -30,6 +31,18 @@ export class ProductsApiStack extends cdk.Stack {
       envName,
     };
 
+
+    // DynamoDB Tables
+    const productsTable = new dynamodb.Table(this, "ProductsTable", {
+      tableName: `products-${envName}`,
+      partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
+    });
+
+    const stocksTable = new dynamodb.Table(this, "StocksTable", {
+      tableName: `stocks-${envName}`,
+      partitionKey: { name: "product_id", type: dynamodb.AttributeType.STRING },
+    });
+
     // Lambda: getProductsList
     const getProductsList = new LambdaConstruct(this, "GetProductsList", {
       ...sharedLambdaProps,
@@ -40,9 +53,13 @@ export class ProductsApiStack extends cdk.Stack {
         MONOREPO_ROOT,
         "product_service/lambdas/get_products_list"
       ),
+      environment: {
+        PRODUCTS_TABLE_NAME: productsTable.tableName,
+        STOCKS_TABLE_NAME: stocksTable.tableName,
+      },
     });
 
-    //Lambda: getProductById 
+    // Lambda: getProductById 
     const getProductById = new LambdaConstruct(this, "GetProductById", {
       ...sharedLambdaProps,
       functionName: "getProductById",
@@ -52,7 +69,17 @@ export class ProductsApiStack extends cdk.Stack {
         MONOREPO_ROOT,
         "product_service/lambdas/get_products_by_id"
       ),
+      environment: {
+        PRODUCTS_TABLE_NAME: productsTable.tableName,
+        STOCKS_TABLE_NAME: stocksTable.tableName,
+      },
     });
+
+    //
+    productsTable.grantReadData(getProductsList.lambdaFunction);
+    productsTable.grantReadData(getProductById.lambdaFunction);
+    stocksTable.grantReadData(getProductsList.lambdaFunction);
+    stocksTable.grantReadData(getProductById.lambdaFunction);
 
     const gateway = new ApiGatewayConstruct(this, "ProductsApiGateway", {
       envName,

@@ -1,4 +1,3 @@
-import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as path from "path";
 import { LambdaConstruct } from "./lambda_construct";
@@ -21,8 +20,8 @@ export class SwaggerConstruct extends Construct {
   ) {
     super(scope, id);
 
-    // ── Create swagger lambda ─────────────────────────────────────────────────
-    // gateway.apiEndpoint is already available because gateway was
+    // Create swagger lambda
+    // gateway.apiEndpoint is (must be!!!) already available because gateway was
     // created before this construct in products_api_stack.ts
     
     const getSwagger = new LambdaConstruct(this, "GetSwagger", {
