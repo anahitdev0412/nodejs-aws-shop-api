@@ -20,18 +20,7 @@ export const handler = async (
   });
 
   try {
-    // Optional: support basic query filtering by category
-    const { category } = event.queryStringParameters ?? {};
-
     let products = PRODUCTS;
-
-    if (category) {
-      products = PRODUCTS.filter(
-        (p) => p.category.toLowerCase() === category.toLowerCase()
-      );
-      log.info(`Filtering by category: ${category}`, { count: products.length });
-    }
-
     log.info("Returning products list", { count: products.length });
 
     return successResponse(products, {

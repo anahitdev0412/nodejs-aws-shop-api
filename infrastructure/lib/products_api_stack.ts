@@ -1,8 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as path from "path";
-import { ProductsLambda } from "./constructs/products_lambda";
-import { ProductsApiGateway } from "./constructs/products_api_gateway";
+import { LambdaConstruct } from "./constructs/lambda_construct";
+import { ApiGatewayConstruct } from "./constructs/api_gateway_construct";
+import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
+import { SwaggerConstruct } from "./constructs/swagger_construct";
 
 export interface ProductsApiStackProps extends cdk.StackProps {
   envName: string;
@@ -29,7 +31,7 @@ export class ProductsApiStack extends cdk.Stack {
     };
 
     // Lambda: getProductsList
-    const getProductsList = new ProductsLambda(this, "GetProductsList", {
+    const getProductsList = new LambdaConstruct(this, "GetProductsList", {
       ...sharedLambdaProps,
       functionName: "getProductsList",
       entry: path.join(MONOREPO_ROOT, "product_service/lambdas/get_products_list/src/index.ts"),
@@ -41,7 +43,7 @@ export class ProductsApiStack extends cdk.Stack {
     });
 
     //Lambda: getProductById 
-    const getProductById = new ProductsLambda(this, "GetProductById", {
+    const getProductById = new LambdaConstruct(this, "GetProductById", {
       ...sharedLambdaProps,
       functionName: "getProductById",
       entry: path.join(MONOREPO_ROOT, "product_service/lambdas/get_products_by_id/src/index.ts"),
@@ -52,26 +54,29 @@ export class ProductsApiStack extends cdk.Stack {
       ),
     });
 
-    const getSwagger = new ProductsLambda(this, "GetSwagger", {
-      ...sharedLambdaProps,
-      functionName: "getSwagger",
-      entry: path.join(
-        MONOREPO_ROOT,
-        "product_service/lambdas/get_swagger/src/index.ts",
-      ),
-      description: "Serves Swagger UI",
-      lambdaPackagePath: path.join(
-        MONOREPO_ROOT,
-        "product_service/lambdas/get_swagger"
-      ),
+    const gateway = new ApiGatewayConstruct(this, "ProductsApiGateway", {
+      envName,
+      routes: [
+        // products service routes
+        {
+          path: "/products",
+          method: apigwv2.HttpMethod.GET,
+          fn: getProductsList.lambdaFunction,
+          integrationId: "GetProductsListIntegration",
+        },
+        {
+          path: "/products/{productId}",
+          method: apigwv2.HttpMethod.GET,
+          fn: getProductById.lambdaFunction,
+          integrationId: "GetProductByIdIntegration",
+        },
+      ],
     });
 
-    // API Gateway
-    new ProductsApiGateway(this, "ApiGateway", {
+    new SwaggerConstruct(this, "Swagger", gateway, {
       envName,
-      getProductsListFn: getProductsList.lambdaFunction,
-      getProductByIdFn: getProductById.lambdaFunction,
-      getSwaggerFn: getSwagger.lambdaFunction,
+      enableTracing,
     });
   }
 }
+

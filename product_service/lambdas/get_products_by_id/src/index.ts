@@ -38,7 +38,7 @@ export const handler = async (event: APIGatewayProxyEventV2, context: Context): 
       );
     }
 
-    log.info("Product found", { productId, productName: product.productName });
+    log.info("Product found", { productId, productName: product.title });
 
     return successResponse(product, {
       requestId: context.awsRequestId,

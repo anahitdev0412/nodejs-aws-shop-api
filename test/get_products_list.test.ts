@@ -12,33 +12,21 @@ jest.mock("@products-api/shared", () => ({
   PRODUCTS: [
     {
       id: "prod-001",
-      productName: "Sony Headphones",
+      title: "Sony Headphones",
       description: "Noise cancelling headphones",
       price: 349.99,
-      image: "https://example.com/image1.jpg",
-      category: "electronics",
-      stock: 45,
-      rating: 4.8,
     },
     {
       id: "prod-002",
-      productName: "Nike Shoes",
+      title: "Nike Shoes",
       description: "Running shoes",
       price: 159.99,
-      image: "https://example.com/image2.jpg",
-      category: "clothing",
-      stock: 78,
-      rating: 4.5,
     },
     {
       id: "prod-003",
-      productName: "MacBook Pro",
+      title: "MacBook Pro",
       description: "Apple laptop",
       price: 1999.0,
-      image: "https://example.com/image3.jpg",
-      category: "electronics",
-      stock: 12,
-      rating: 4.9,
     },
   ],
   successResponse: jest.fn((data, meta) => ({
@@ -94,39 +82,6 @@ describe("getProductsList handler", () => {
  
       const [data] = (successResponse as jest.Mock).mock.calls[0];
       expect(data).toHaveLength(3);
-    });
-  });
- 
-  // ── Category filter ───────────────────────────────────────────────────────────
-  describe("when filtering by category", () => {
-    it("should return only products matching the category", async () => {
-      await handler(buildEvent({ category: "electronics" }), mockContext);
- 
-      const [data] = (successResponse as jest.Mock).mock.calls[0];
-      expect(data).toHaveLength(2);
-      expect(data.every((p: { category: string }) => p.category === "electronics")).toBe(true);
-    });
- 
-    it("should be case insensitive when filtering", async () => {
-      await handler(buildEvent({ category: "ELECTRONICS" }), mockContext);
- 
-      const [data] = (successResponse as jest.Mock).mock.calls[0];
-      expect(data).toHaveLength(2);
-    });
- 
-    it("should return empty array when no products match the category", async () => {
-      await handler(buildEvent({ category: "furniture" }), mockContext);
- 
-      const [data, meta] = (successResponse as jest.Mock).mock.calls[0];
-      expect(data).toHaveLength(0);
-      expect(meta.total).toBe(0);
-    });
- 
-    it("should return correct total in meta when filtering", async () => {
-      await handler(buildEvent({ category: "clothing" }), mockContext);
- 
-      const [, meta] = (successResponse as jest.Mock).mock.calls[0];
-      expect(meta.total).toBe(1);
     });
   });
  

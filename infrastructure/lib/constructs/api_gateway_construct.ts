@@ -6,11 +6,16 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 
-export interface ProductsApiGatewayProps {
+export interface RouteDefinition {
+  path: string;
+  method: apigwv2.HttpMethod;
+  fn: lambda.Function;
+  integrationId: string;
+}
+
+export interface ApiGatewayConstructProps {
   envName: string;
-  getProductsListFn: lambda.Function;
-  getProductByIdFn: lambda.Function;
-  getSwaggerFn: lambda.Function; // Optional, only needed if Swagger UI is enabled;
+  routes: RouteDefinition[];  // ← all routes from all services
 }
 
 /**
@@ -21,15 +26,16 @@ export interface ProductsApiGatewayProps {
  * - Staged deployments
  */
 
-export class ProductsApiGateway extends Construct {
+export class ApiGatewayConstruct extends Construct {
   public readonly api: apigwv2.HttpApi;
+  //public readonly apiEndpoint: string;
 
-  constructor(scope: Construct, id: string, props: ProductsApiGatewayProps) {
+  constructor(scope: Construct, id: string, props: ApiGatewayConstructProps) {
     super(scope, id);
 
     // Access Log Group
     const accessLogGroup = new logs.LogGroup(this, "ApiAccessLogs", {
-      logGroupName: `/aws/apigateway/products-api-${props.envName}`,
+      logGroupName: `/aws/apigateway/rsschool-shop-api-${props.envName}`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -51,7 +57,6 @@ export class ProductsApiGateway extends Construct {
         ],
         maxAge: cdk.Duration.days(1),
       }
-      // createDefaultStage: false,
     });
 
     // Stage
@@ -69,50 +74,15 @@ export class ProductsApiGateway extends Construct {
       },
     });
 
-    // Lambda Integrations
-    const getProductsListIntegration =
-      new apigwv2Integrations.HttpLambdaIntegration(
-        "GetProductsListIntegration",
-        props.getProductsListFn
-      );
-
-    const getProductByIdIntegration =
-      new apigwv2Integrations.HttpLambdaIntegration(
-        "GetProductByIdIntegration",
-        props.getProductByIdFn
-      );
-
-    // GET /products → getProductsList
-    this.api.addRoutes({
-      path: "/products",
-      methods: [apigwv2.HttpMethod.GET],
-      integration: getProductsListIntegration,
-    });
-
-    // GET /products/{productId} → getProductById
-    this.api.addRoutes({
-      path: "/products/{productId}",
-      methods: [apigwv2.HttpMethod.GET],
-      integration: getProductByIdIntegration,
-    });
-
-    // GET /swagger and GET /swagger/swagger.json → getSwagger
-    this.api.addRoutes({
-      path: "/swagger",
-      methods: [apigwv2.HttpMethod.GET],
-      integration: new apigwv2Integrations.HttpLambdaIntegration(
-        "GetSwaggerIntegration",
-        props.getSwaggerFn
-      ),
-    });
-
-    this.api.addRoutes({
-      path: "/swagger/swagger.json",
-      methods: [apigwv2.HttpMethod.GET],
-      integration: new apigwv2Integrations.HttpLambdaIntegration(
-        "GetSwaggerJsonIntegration",
-        props.getSwaggerFn
-      ),
+    props.routes.forEach((route) => {
+      this.api.addRoutes({
+        path: route.path,
+        methods: [route.method],
+        integration: new apigwv2Integrations.HttpLambdaIntegration(
+          route.integrationId,
+          route.fn
+        ),
+      });
     });
 
     // Outputs
@@ -142,6 +112,19 @@ export class ProductsApiGateway extends Construct {
     new cdk.CfnOutput(this, "SwaggerUiEndpoint", {
       value: `${apiUrl}swagger`,
       description: "Swagger UI endpoint",
+    });
+  }
+
+  public addRoutes(routes: RouteDefinition[]): void {
+    routes.forEach((route) => {
+      this.api.addRoutes({
+        path: route.path,
+        methods: [route.method],
+        integration: new apigwv2Integrations.HttpLambdaIntegration(
+          route.integrationId,
+          route.fn
+        ),
+      });
     });
   }
 }

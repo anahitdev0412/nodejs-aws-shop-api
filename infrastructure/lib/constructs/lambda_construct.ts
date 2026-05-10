@@ -6,7 +6,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import * as path from "path";
 
-export interface ProductsLambdaProps {
+export interface LambdaConstructProps {
   functionName: string;
   lambdaPackagePath: string;
   entry: string;
@@ -20,11 +20,11 @@ export interface ProductsLambdaProps {
 
 const MONOREPO_ROOT = path.join(__dirname, "../../../");
 
-export class ProductsLambda extends Construct {
+export class LambdaConstruct extends Construct {
   public readonly lambdaFunction: lambda.Function;
   public readonly logGroup: logs.LogGroup;
 
-  constructor(scope: Construct, id: string, props: ProductsLambdaProps) {
+  constructor(scope: Construct, id: string, props: LambdaConstructProps) {
     super(scope, id);
 
     // IAM Role
