@@ -7,7 +7,8 @@ import {
   validationErrorResponse,
   internalErrorResponse,
 } from "@products-api/shared";
-import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";  
+import { TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+import * as yup from "yup";
 
 const logger = new Logger("create-product");
 
@@ -22,6 +23,36 @@ interface CreateProductBody {
   price: number;
   count: number;
 }
+
+// Yup validation schema for request body
+ 
+const createProductSchema = yup.object({
+  title: yup
+    .string()
+    .required("title is required")
+    .trim()
+    .min(1, "title must not be empty"),
+ 
+  description: yup
+    .string()
+    .optional()
+    .default(""),
+ 
+  price: yup
+    .number()
+    .required("price is required")
+    .positive("price must be a positive integer")
+    .typeError("price must be a number"),
+ 
+  count: yup
+    .number()
+    .required("count is required")
+    .integer("count must be an integer")
+    .min(0, "count must be a non-negative integer")
+    .typeError("count must be a number"),
+});
+
+type CreateProductInput = yup.InferType<typeof createProductSchema>;
 
 export const handler = async (event: APIGatewayProxyEventV2, context: Context): Promise<APIGatewayProxyResultV2> => {
   const log = logger.withRequestId(context.awsRequestId);
@@ -41,18 +72,37 @@ export const handler = async (event: APIGatewayProxyEventV2, context: Context): 
       return validationErrorResponse("Request body must be valid JSON");
     }
 
+    // Validate with Yup schema and strip unknown fields
+    let data: CreateProductInput;
+ 
+    try {
+      // abortEarly: false collects all errors instead of stopping at first
+      data = await createProductSchema.validate(parsedBody, {
+        abortEarly: false,
+        stripUnknown: true,  // removes extra fields not in schema
+      });
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        log.warn("Validation failed", { errors: error.errors });
+        return validationErrorResponse("Validation failed", {
+          errors: error.errors,
+        });
+      }
+      throw error;
+    }
+
     const productId = uuidv4();
  
     const product = {
       id: productId,
-      title: (parsedBody as CreateProductBody).title,
-      description: (parsedBody as CreateProductBody).description ?? "",
-      price: (parsedBody as CreateProductBody).price,
+      title: data.title,
+      description: data.description ?? "",
+      price: data.price,
     };
  
     const stock = {
       product_id: productId,
-      count: (parsedBody as CreateProductBody).count,
+      count: data.count,
     };
  
     log.info("Creating product with stock", { productId, title: product.title });
@@ -86,55 +136,17 @@ export const handler = async (event: APIGatewayProxyEventV2, context: Context): 
       { requestId: context.awsRequestId },
       201  // Created
     );
-
-
-
-
-
-
-    // const productId = event.pathParameters?.productId;
-
-    // // Validation
-    // if (!productId) {
-    //   log.warn("Missing productId path/query parameter");
-    //   return validationErrorResponse("productId path/query parameter is required");
-    // }
-
-    // // Lookup product by ID
-    // const [productResult, stockResult] = await Promise.all([
-    //   docClient.send(new GetCommand({
-    //     TableName: process.env.PRODUCTS_TABLE_NAME,
-    //     Key: { id: productId },
-    //   })),
-    //   docClient.send(new GetCommand({
-    //     TableName: process.env.STOCKS_TABLE_NAME,
-    //     Key: { product_id: productId },
-    //   })),
-    // ]);
-
-    // if (!productResult.Item) {
-    //   log.warn("Product not found", { productId });
-    //   return notFoundResponse(
-    //     `Product with ID '${productId}' was not found`,
-    //     ErrorCodes.PRODUCT_NOT_FOUND
-    //   );
-    // }
-
-    // const product = productResult.Item as Product;
-    // const stock   = stockResult.Item as Stock | undefined;
-
-    // const result: ProductWithStock = {
-    //   ...product,
-    //   count: stock?.count ?? 0,
-    // };
-
-    // log.info("Product found", { productId, title: product.title });
-
-    // return successResponse(result, {
-    //   requestId: context.awsRequestId,
-    // });
   } catch (error) {
     log.error("Unexpected error while fetching product by ID", { error });
+    if (
+      error instanceof Error &&
+      error.name === "TransactionCanceledException"
+    ) {
+      log.warn("Transaction cancelled", { error });
+      return validationErrorResponse("Product could not be created due to a conflict");
+    }
+ 
+    log.error("Unexpected error while creating product", { error });
     return internalErrorResponse(context.awsRequestId);
   }
 };
