@@ -46,9 +46,16 @@ export class ApiGatewayConstruct extends Construct {
       description: `Products HTTP API (${props.envName})`,
 
       // CORS — handled natively by HTTP API (no preflight Lambda needed)
+
       corsPreflight: {
         allowOrigins: ["*"],
-        allowMethods: [apigwv2.CorsHttpMethod.GET, apigwv2.CorsHttpMethod.OPTIONS],
+        allowMethods: [
+          apigwv2.CorsHttpMethod.GET,
+          apigwv2.CorsHttpMethod.POST,
+          apigwv2.CorsHttpMethod.PUT,
+          apigwv2.CorsHttpMethod.DELETE,
+          apigwv2.CorsHttpMethod.OPTIONS,
+        ],
         allowHeaders: [
           "Content-Type",
           "X-Amz-Date",
