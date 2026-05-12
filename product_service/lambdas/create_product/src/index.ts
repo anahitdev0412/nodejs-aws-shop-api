@@ -40,12 +40,14 @@ const createProductSchema = yup.object({
  
   price: yup
     .number()
+    .strict()
     .required("price is required")
     .positive("price must be a positive integer")
     .typeError("price must be a number"),
  
   count: yup
     .number()
+    .strict()
     .required("count is required")
     .integer("count must be an integer")
     .min(0, "count must be a non-negative integer")
