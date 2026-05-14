@@ -1,5 +1,6 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, Context } from "aws-lambda";
-import { Logger, successResponse, internalErrorResponse, notFoundResponse, validationErrorResponse,  ErrorCodes, findProductById  } from "@products-api/shared";  
+import { Logger, successResponse, internalErrorResponse, notFoundResponse, validationErrorResponse,  ErrorCodes, docClient, Product, Stock, ProductWithStock  } from "@products-api/shared";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";  
 
 const logger = new Logger("get-product-by-id");
 
@@ -27,10 +28,18 @@ export const handler = async (event: APIGatewayProxyEventV2, context: Context): 
     }
 
     // Lookup product by ID
-    log.info("Looking up product", { productId });
-    const product = findProductById(productId);
+    const [productResult, stockResult] = await Promise.all([
+      docClient.send(new GetCommand({
+        TableName: process.env.PRODUCTS_TABLE_NAME,
+        Key: { id: productId },
+      })),
+      docClient.send(new GetCommand({
+        TableName: process.env.STOCKS_TABLE_NAME,
+        Key: { product_id: productId },
+      })),
+    ]);
 
-    if (!product) {
+    if (!productResult.Item) {
       log.warn("Product not found", { productId });
       return notFoundResponse(
         `Product with ID '${productId}' was not found`,
@@ -38,9 +47,17 @@ export const handler = async (event: APIGatewayProxyEventV2, context: Context): 
       );
     }
 
-    log.info("Product found", { productId, productName: product.productName });
+    const product = productResult.Item as Product;
+    const stock   = stockResult.Item as Stock | undefined;
 
-    return successResponse(product, {
+    const result: ProductWithStock = {
+      ...product,
+      count: stock?.count ?? 0,
+    };
+
+    log.info("Product found", { productId, title: product.title });
+
+    return successResponse(result, {
       requestId: context.awsRequestId,
     });
   } catch (error) {

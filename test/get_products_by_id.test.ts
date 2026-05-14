@@ -49,13 +49,9 @@ const buildEvent = (productId?: string): APIGatewayProxyEventV2 =>
 
 const mockProduct = {
   id: "prod-001",
-  productName: "Sony WH-1000XM5",
+  title: "Sony WH-1000XM5",
   description: "Noise cancelling headphones",
   price: 349.99,
-  image: "https://example.com/image.jpg",
-  category: "electronics",
-  stock: 45,
-  rating: 4.8,
 };
 
 // Tests
