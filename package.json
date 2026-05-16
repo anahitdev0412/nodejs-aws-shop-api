@@ -45,6 +45,7 @@
     "aws-cdk-lib": "^2.252.0",
     "aws-lambda": "^1.0.7",
     "constructs": "^10.6.0",
+    "csv-parser": "^3.2.1",
     "uuid": "^14.0.0"
   }
 }
