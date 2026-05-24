@@ -101,6 +101,7 @@ export class ProductsApiStack extends cdk.Stack {
     
     const gateway = new ApiGatewayConstruct(this, "ProductsApiGateway", {
       envName,
+      apiName: "products-api",
       routes: [
         // products service routes
         {
