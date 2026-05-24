@@ -16,6 +16,7 @@ export interface RouteDefinition {
 export interface ApiGatewayConstructProps {
   envName: string;
   routes: RouteDefinition[];  // ← all routes from all services
+  apiName?: string;
 }
 
 /**
@@ -35,14 +36,14 @@ export class ApiGatewayConstruct extends Construct {
 
     // Access Log Group
     const accessLogGroup = new logs.LogGroup(this, "ApiAccessLogs", {
-      logGroupName: `/aws/apigateway/rsschool-shop-api-${props.envName}`,
+      logGroupName: `/aws/apigateway/rsschool-${props.apiName ?? "shop-api"}-${props.envName}`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     // HTTP API
     this.api = new apigwv2.HttpApi(this, "HttpApi", {
-      apiName: `products-api-${props.envName}`,
+      apiName: `${props.apiName ?? "shop-api"}-${props.envName}`,
       description: `Products HTTP API (${props.envName})`,
 
       // CORS — handled natively by HTTP API (no preflight Lambda needed)
@@ -98,7 +99,7 @@ export class ApiGatewayConstruct extends Construct {
     new cdk.CfnOutput(this, "ApiUrl", {
       value: apiUrl,
       description: "Products API base URL",
-      exportName: `products-api-url-${props.envName}`,
+      exportName: `${props.apiName}-url-${props.envName}`,
     });
 
     new cdk.CfnOutput(this, "ApiId", {

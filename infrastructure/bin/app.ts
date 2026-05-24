@@ -2,6 +2,7 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { ProductsApiStack, ProductsApiStackProps } from "../lib/products_api_stack";
+import { ImportProductStack, ImportApiStackProps } from "../lib/import_product_stack";
 
 const app = new cdk.App();
 
@@ -11,6 +12,11 @@ const envConfig = getEnvConfig(envName);
 
 // Deploy stack
 new ProductsApiStack(app, `ProductsApiStack-${envName}`, {
+  envName,
+  ...envConfig,
+});
+
+new ImportProductStack(app, `ImportProductStack-${envName}`, {
   envName,
   ...envConfig,
 });

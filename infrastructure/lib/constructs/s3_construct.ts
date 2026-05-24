@@ -13,7 +13,7 @@ export class S3Construct extends Construct {
     super(scope, id);
 
     this.bucket = new s3.Bucket(this, "ImportBucket", {
-      bucketName: `import-product-csv-${props.envName}`,
+      bucketName: `import-csv-${props.envName}-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       encryption: s3.BucketEncryption.S3_MANAGED,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
